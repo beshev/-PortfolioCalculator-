@@ -1,0 +1,112 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<h1>Please update file!</h1>
+<form id="uploadForm">
+    <input type="file" id="fileInput" />
+    <button type="submit" class="btn btn-secondary">Upload</button>
+</form>
+
+<div id="result"></div>
+
+<script>
+    document.getElementById('uploadForm')
+        .addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length === 0) {
+                alert('Please select a file.');
+                return;
+            }
+
+
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const resultContainer = document.getElementById('result');
+                resultContainer.innerHTML = 'Calculacting...';
+                const response = await fetch('/api/portfolio/calculate', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    buildOrderedList(result);
+                    console.log(@(this.ViewBag.RefreshTimeInMilliseconds));
+                    setInterval(refreshPortfolio, @(this.ViewBag.RefreshTimeInMilliseconds));
+                }
+            } catch (error) {
+                console.log(error.message);
+            }
+        });
+
+    async function refreshPortfolio() {
+        const resultContainer = document.getElementById('result');
+        resultContainer.innerHTML = 'Refreshing...';
+        try {
+            const response = await fetch('/api/portfolio/refresh', {
+                method: 'GET'
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                buildOrderedList(result)
+            }
+        } catch (error) {
+            console.log(error.message);
+        }
+    }
+
+    // Function to build ordered list
+    function buildOrderedList(file) {
+        const resultContainer = document.getElementById('result');
+        resultContainer.innerHTML = '';
+
+        var h2 = document.createElement('h2');
+        h2.innerHTML = 'Portfolio';
+        resultContainer.appendChild(h2);
+
+
+        const ol = document.createElement('ol');
+        const initialValueLi = document.createElement('li');
+        initialValueLi.textContent = 'Initial value: ' + file.initialValue;
+
+        const currentValueLi = document.createElement('li');
+        currentValueLi.textContent = 'Current value: ' + file.currentValue;
+
+        const overallChangeLi = document.createElement('li');
+        overallChangeLi.textContent = 'Overall change: ' + file.overallChange + '%';
+
+        ol.appendChild(initialValueLi);
+        ol.appendChild(currentValueLi);
+        ol.appendChild(overallChangeLi);
+        resultContainer.appendChild(ol);
+
+        file.entries.forEach(entry => {
+            const entriesOl = document.createElement('ol');
+            const coinLi = document.createElement('li');
+            coinLi.textContent = 'Coin: ' + entry.coin;
+
+            const amountLi = document.createElement('li');
+            amountLi.textContent = 'Amount: ' + entry.amount;
+
+            const initialPriceLi = document.createElement('li');
+            initialPriceLi.textContent = 'Initial price: ' + entry.initialPrice;
+
+            const percentageChangeLi = document.createElement('li');
+            percentageChangeLi.textContent = 'Percentage change: ' + entry.percentageChange + '%';
+
+
+            entriesOl.appendChild(coinLi);
+            entriesOl.appendChild(amountLi);
+            entriesOl.appendChild(initialPriceLi);
+            entriesOl.appendChild(percentageChangeLi);
+            resultContainer.appendChild(entriesOl);
+        });
+    }
+</script>
