@@ -36,6 +36,11 @@
                 return BadRequest("File not provided");
 
             var portfolioEntries = await _fileService.ParseFileAsync(file, cancellationToken);
+            if (!portfolioEntries.Any())
+            {
+                return BadRequest("No valid data is in the provided file");
+            }
+
             var porfolio = await _portfolioService.CalculatePortfolioAsync(portfolioEntries, cancellationToken);
 
             var userSessionId = HttpContext.Session.GetString(Constants.UserSessionKey);
