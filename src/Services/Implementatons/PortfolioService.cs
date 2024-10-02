@@ -57,6 +57,7 @@
                 initialTotalValue += entry.Amount * entry.InitialPrice;
                 currentTotalValue += entry.Amount * currentPrice;
 
+                // TODO: When calculating the values, we need to be cautious about zero division!
                 var percentageChange = (currentPrice - entry.InitialPrice) / entry.InitialPrice * 100;
                 entry.PercentageChange = percentageChange.ToString("F2", CultureInfo.InvariantCulture);
             }
